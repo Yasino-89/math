@@ -118,13 +118,17 @@
     let currentQuestion = {};
     let timer;
     let timeLeft;
+    let questionCount = 0;
+    const maxQuestions = 10;
 
     const questions = [
-      "عدد الطلاب أكبر من",
-      "وزن الصندوق أقل من أو يساوي",
-      "مسموح دخول الطلاب الذين طولهم على الأقل",
-      "الرقم المطلوب لا يساوي",
-      "عمر الطالب أكبر من أو يساوي",
+      { text: "أكبر من", symbol: ">" },
+      { text: "أقل من", symbol: "<" },
+      { text: "أكبر من أو يساوي", symbol: "≥" },
+      { text: "أقل من أو يساوي", symbol: "≤" },
+      { text: "لا يساوي", symbol: "≠" },
+      { text: "على الأقل", symbol: "≥" },
+      { text: "على الأكثر", symbol: "≤" },
     ];
 
     function startGame() {
@@ -137,6 +141,7 @@
       document.getElementById("welcome-screen").style.display = "none";
       document.getElementById("game-screen").style.display = "block";
       score = 0;
+      questionCount = 0;
       generateQuestion();
     }
 
@@ -156,14 +161,21 @@
     }
 
     function generateQuestion() {
+      if (questionCount >= maxQuestions) {
+        endGame();
+        return;
+      }
+
       clearInterval(timer);
       startTimer();
+      questionCount++;
       const randomIndex = Math.floor(Math.random() * questions.length);
       currentQuestion = {
-        text: questions[randomIndex],
+        text: questions[randomIndex].text,
+        symbol: questions[randomIndex].symbol,
         number: Math.floor(Math.random() * 50) + 1,
       };
-      document.getElementById("question").innerText = `${currentQuestion.text} ${currentQuestion.number}`;
+      document.getElementById("question").innerText = `السؤال ${questionCount}: العدد ${currentQuestion.text} ${currentQuestion.number}`;
       document.getElementById("feedback").innerText = "";
       document.getElementById("selected-symbol").innerText = "?";
       document.getElementById("variable").value = "";
@@ -188,11 +200,10 @@
       clearInterval(timer);
 
       const userAnswer = `${variable} ${symbol} ${number}`;
-      const correctSymbol = determineCorrectSymbol(currentQuestion.text);
-      const correctAnswer = `${variable} ${correctSymbol} ${currentQuestion.number}`;
+      const correctAnswer = `${variable} ${currentQuestion.symbol} ${currentQuestion.number}`;
 
       let feedbackMessage;
-      if (symbol === correctSymbol && number == currentQuestion.number) {
+      if (symbol === currentQuestion.symbol && number == currentQuestion.number) {
         feedbackMessage = `أحسنت ... إجابة صحيحة\nإجابتك: ${userAnswer}\nالإجابة الصحيحة: ${correctAnswer}`;
         document.getElementById("feedback").className = "feedback correct";
         score++;
@@ -206,20 +217,10 @@
       document.getElementById("next-question").style.display = "block";
     }
 
-    function determineCorrectSymbol(questionText) {
-      if (questionText.includes("أكبر من أو يساوي")) return "≥";
-      if (questionText.includes("أكبر")) return ">";
-      if (questionText.includes("أقل من أو يساوي")) return "≤";
-      if (questionText.includes("أقل")) return "<";
-      if (questionText.includes("لا يساوي")) return "≠";
-      return "?";
-    }
-
     function endGame() {
-      alert(`انتهت اللعبة! إجاباتك الصحيحة: ${score}`);
+      alert(`انتهت اللعبة! إجاباتك الصحيحة: ${score} من ${maxQuestions}`);
       document.getElementById("welcome-screen").style.display = "block";
       document.getElementById("game-screen").style.display = "none";
-      clearInterval(timer);
     }
   </script>
 </body>
